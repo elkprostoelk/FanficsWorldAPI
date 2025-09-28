@@ -19,6 +19,7 @@ namespace FanficsWorldAPI.Core.Services
     public class AuthService : IAuthService
     {
         private readonly IValidator<LoginDto> _loginDtoValidator;
+        private readonly IValidator<RegisterDto> _registerDtoValidator;
         private readonly IRepository<User> _userRepository;
         private readonly JwtOptions _jwtOptions;
 
@@ -30,11 +31,13 @@ namespace FanficsWorldAPI.Core.Services
         public AuthService(
             IValidator<LoginDto> loginDtoValidator,
             IRepository<User> userRepository,
-            IOptions<JwtOptions> jwtOptions)
+            IOptions<JwtOptions> jwtOptions,
+            IValidator<RegisterDto> registerDtoValidator)
         {
             _loginDtoValidator = loginDtoValidator;
             _userRepository = userRepository;
             _jwtOptions = jwtOptions.Value;
+            _registerDtoValidator = registerDtoValidator;
         }
 
         public async Task<ServiceResultDto<string>> LoginAsync(LoginDto loginDto)
@@ -75,6 +78,33 @@ namespace FanficsWorldAPI.Core.Services
                 Errors = isPasswordValid ? []
                     : [$"Invalid password. You have {MaxFailedLoginAttempts - user.FailedLoginAttempts} login attempt(s) left."],
                 Value = isPasswordValid ? GenerateToken(user) : null
+            };
+        }
+
+        public async Task<ServiceResultDto> RegisterAsync(RegisterDto registerDto)
+        {
+            const int UserRoleId = 3;
+
+            await _registerDtoValidator.ValidateAndThrowAsync(registerDto);
+
+            var user = new User
+            {
+                Name = registerDto.Name,
+                BirthDate = registerDto.BirthDate,
+                Email = registerDto.Email,
+                Bio = registerDto.Bio,
+                IsActive = true,
+                RoleId = UserRoleId
+            };
+
+            (user.PasswordHash, user.PasswordSalt) = HashPassword(registerDto.Password);
+
+            var userCreated = await _userRepository.InsertAsync(user);
+
+            return new ServiceResultDto
+            {
+                IsSuccess = userCreated,
+                Errors = userCreated ? [] : ["Failed to register a user."]
             };
         }
 

@@ -41,5 +41,25 @@ namespace FanficsWorldAPI.WebApi.Controllers
 
             return Forbid();
         }
+
+        [HttpPost("register")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Register(RegisterDto registerDto)
+        {
+            var registerResult = await _authService.RegisterAsync(registerDto);
+
+            if (registerResult.IsSuccess)
+            {
+                return StatusCode(StatusCodes.Status201Created);
+            }
+
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Instance = HttpContext.Request.Path,
+                Title = "Failed to register a new user."
+            });
+        }
     }
 }
