@@ -1,0 +1,41 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+          
+      - name: Restore dependencies
+        run: dotnet restore ./FanficsWorldAPI.sln
+
+      - name: Build
+        run: dotnet build ./FanficsWorldAPI.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test ./FanficsWorldAPI.sln --no-build --verbosity normal
+
+      - name: Publish
+        run: dotnet publish ./FanficsWorldAPI.WebApi/FanficsWorldAPI.WebApi.csproj -c Release -o ./publish
+
+      - name: Upload published artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fanficsworld-api
+          path: ./publish
