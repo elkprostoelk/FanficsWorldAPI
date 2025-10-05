@@ -25,5 +25,7 @@ namespace FanficsWorldAPI.DataAccess.Entities
         public string PasswordHash { get; set; } = string.Empty;
 
         public Role Role { get; set; } = null!;
+
+        public List<Fanfic> Fanfics { get; set; } = [];
     }
 }

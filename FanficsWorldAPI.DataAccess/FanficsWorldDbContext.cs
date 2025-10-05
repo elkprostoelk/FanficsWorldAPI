@@ -10,6 +10,10 @@ namespace FanficsWorldAPI.DataAccess
 
         public DbSet<Role> Roles { get; set; }
 
+        public DbSet<Fanfic> Fanfics { get; set; }
+
+        public DbSet<FanficChapter> FanficChapters { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -73,8 +73,12 @@ namespace FanficsWorldAPI.WebApi.Extensions
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddScoped<IRepository<User>, Repository<User>>();
+            builder.Services.AddScoped<IRepository<FanficChapter>, Repository<FanficChapter>>();
+            builder.Services.AddScoped<IRepository<Fanfic>, Repository<Fanfic>>();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IFanficService, FanficService>();
+            builder.Services.AddScoped<IFanficChapterService, FanficChapterService>();
         }
 
         public static void RegisterSwagger(this WebApplicationBuilder builder)
