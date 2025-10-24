@@ -119,7 +119,7 @@ namespace FanficsWorldAPI.Core.Services
                 audience: _jwtOptions.Audience,
                 claims: [
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user.Email),
+                    new Claim(ClaimTypes.Name, user.Name),
                     new Claim(ClaimTypes.Role, user.Role.Name)
                 ],
                 expires: DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiresInMinutes),
