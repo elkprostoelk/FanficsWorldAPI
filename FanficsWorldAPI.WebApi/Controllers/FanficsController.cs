@@ -16,6 +16,15 @@ namespace FanficsWorldAPI.WebApi.Controllers
             _fanficService = fanficService;
         }
 
+        [HttpGet]
+        [ProducesResponseType<PagedResultDto<FanficListItemDto>>(StatusCodes.Status200OK, "application/json")]
+        public async Task<IActionResult> SearchFanfics(
+            [FromQuery] SearchFanficsDto searchFanficsDto,
+            CancellationToken cancellationToken)
+        {
+            return Ok(await _fanficService.SearchForFanficsAsync(searchFanficsDto, cancellationToken));
+        }
+
         [HttpPost]
         [Authorize]
         [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
