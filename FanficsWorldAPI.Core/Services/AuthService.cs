@@ -143,8 +143,12 @@ namespace FanficsWorldAPI.Core.Services
                 saltBytes = Convert.FromBase64String(oldSalt);
             }
 
-            var hashBytes = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA256)
-                .GetBytes(HashSize);
+            var hashBytes = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                saltBytes,
+                Iterations,
+                HashAlgorithmName.SHA256,
+                HashSize);
 
             string saltBase64 = !string.IsNullOrWhiteSpace(oldSalt)
                 ? oldSalt
