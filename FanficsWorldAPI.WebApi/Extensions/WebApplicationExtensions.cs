@@ -9,7 +9,7 @@ namespace FanficsWorldAPI.WebApi.Extensions
         public static void UseAppExceptionHandler(this WebApplication app)
         {
             var isDevelopment = app.Environment.IsDevelopment();
-            app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
+            app.UseExceptionHandler(errorApp => errorApp.Run(async (context) =>
             {
                 var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
                 var exception = exceptionHandlerPathFeature?.Error;
@@ -29,9 +29,13 @@ namespace FanficsWorldAPI.WebApi.Extensions
                             };
 
                             context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                            context.Response.ContentType = "application/problem+json";
+                            await context.Response.WriteAsJsonAsync(problemDetails);
 
                             break;
                         }
+                    case TaskCanceledException when context.RequestAborted.IsCancellationRequested:
+                        break;
                     default:
                         {
                             problemDetails = new ProblemDetails
@@ -43,12 +47,12 @@ namespace FanficsWorldAPI.WebApi.Extensions
                             };
 
                             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                            context.Response.ContentType = "application/problem+json";
+                            await context.Response.WriteAsJsonAsync(problemDetails);
+
                             break;
                         }
                 }
-
-                context.Response.ContentType = "application/problem+json";
-                await context.Response.WriteAsJsonAsync(problemDetails);
             }));
         }
     }
