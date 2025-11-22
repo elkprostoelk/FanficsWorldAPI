@@ -12,5 +12,7 @@ namespace FanficsWorldAPI.DataAccess
         Task<bool> UpdateAsync(TEntity entity);
 
         Task<bool> DeleteAsync(TEntity entity);
+
+        Task<bool> DeleteRangeAsync(List<TEntity> entities);
     }
 }

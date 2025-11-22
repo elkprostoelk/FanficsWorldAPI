@@ -17,22 +17,25 @@ namespace FanficsWorldAPI.Core.Services
         private readonly IRepository<Fanfic> _fanficRepository;
         private readonly IValidator<CreateFanficDto> _createFanficDtoValidator;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IFanficChapterService _fanficChapterService;
+        private readonly string _userId;
 
         public FanficService(
             IRepository<Fanfic> fanficRepository,
             IValidator<CreateFanficDto> createFanficDtoValidator,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IFanficChapterService fanficChapterService)
         {
             _fanficRepository = fanficRepository;
             _createFanficDtoValidator = createFanficDtoValidator;
             _httpContextAccessor = httpContextAccessor;
+            _fanficChapterService = fanficChapterService;
+            _userId = _httpContextAccessor.HttpContext.User.GetUserId();
         }
 
         public async Task<ServiceResultDto<string>> CreateFanficAsync(CreateFanficDto createFanficDto)
         {
             await _createFanficDtoValidator.ValidateAndThrowAsync(createFanficDto);
-
-            var userId = _httpContextAccessor.HttpContext.User.GetUserId();
 
             var fanfic = new Fanfic
             {
@@ -41,7 +44,7 @@ namespace FanficsWorldAPI.Core.Services
                 Direction = createFanficDto.Direction,
                 Rating = createFanficDto.Rating,
                 Status = FanficStatus.InProgress,
-                AuthorId = userId,
+                AuthorId = _userId,
                 CreatedDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow
             };
@@ -96,6 +99,43 @@ namespace FanficsWorldAPI.Core.Services
                 searchFanficsDto.CurrentPage,
                 searchFanficsDto.PageSize);
         }
+
+        public async Task<ServiceResultDto> DeleteFanficAsync(string id)
+        {
+            var fanfic = await _fanficRepository
+                .EntitySet
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (fanfic is null)
+            {
+                return new ServiceResultDto(
+                    isSuccess: false,
+                    errors: ErrorMessageConstants.FanficNotFound);
+            }
+
+            if (fanfic.AuthorId != _userId)
+            {
+                return new ServiceResultDto(
+                    isSuccess: false,
+                    errors: ErrorMessageConstants.Forbidden);
+            }
+
+            var chaptersDeletingResult = await _fanficChapterService.DeleteChaptersByFanficIdAsync(fanfic.Id);
+            if (!chaptersDeletingResult.IsSuccess)
+            {
+                return new ServiceResultDto(
+                    isSuccess: false,
+                    errors: ErrorMessageConstants.CannotDeleteFanficChaptersNotDeleted);
+            }
+
+            var deleted = await _fanficRepository.DeleteAsync(fanfic);
+
+            return new ServiceResultDto(
+                isSuccess: deleted,
+                errors: deleted ? [] : ["Failed to delete the fanfic."]);
+        }
+
+        #region Private Methods
 
         private static IQueryable<Fanfic> ApplySorting(IQueryable<Fanfic> query, SearchFanficsDto searchFanficsDto)
         {
@@ -193,5 +233,7 @@ namespace FanficsWorldAPI.Core.Services
 
             return query.Where(f => f.Author.Name.Contains(author));
         }
+
+        #endregion
     }
 }

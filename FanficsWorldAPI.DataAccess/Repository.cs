@@ -31,5 +31,11 @@ namespace FanficsWorldAPI.DataAccess
             _dbContext.Remove(entity);
             return await _dbContext.SaveChangesAsync() > 0;
         }
+
+        public async Task<bool> DeleteRangeAsync(List<TEntity> entities)
+        {
+            _dbContext.RemoveRange(entities);
+            return await _dbContext.SaveChangesAsync() > 0;
+        }
     }
 }
