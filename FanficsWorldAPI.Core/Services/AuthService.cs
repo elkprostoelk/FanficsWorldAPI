@@ -66,7 +66,7 @@ namespace FanficsWorldAPI.Core.Services
                 if (user.FailedLoginAttempts == MaxFailedLoginAttempts)
                 {
                     user.IsActive = false;
-                    Log.Information("User {userEmail} was blocked after {failedAttempts} failed login attempts.", user.Email, user.FailedLoginAttempts);
+                    Log.Information("User {UserEmail} was blocked after {FailedAttempts} failed login attempts.", user.Email, user.FailedLoginAttempts);
                 }
 
                 await _userRepository.UpdateAsync(user);

@@ -42,7 +42,7 @@ namespace FanficsWorldAPI.Core.Services
                 FanficId = createChapterDto.FanficId,
                 CreatedDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
-                Number = ++lastChapterNumber
+                Number = lastChapterNumber + 1
             };
 
             var created = await _fanficChapterRepository.InsertAsync(chapter);

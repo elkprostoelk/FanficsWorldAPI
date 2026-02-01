@@ -16,7 +16,6 @@ namespace FanficsWorldAPI.Core.Services
     {
         private readonly IRepository<Fanfic> _fanficRepository;
         private readonly IValidator<CreateFanficDto> _createFanficDtoValidator;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFanficChapterService _fanficChapterService;
         private readonly string _userId;
 
@@ -28,9 +27,8 @@ namespace FanficsWorldAPI.Core.Services
         {
             _fanficRepository = fanficRepository;
             _createFanficDtoValidator = createFanficDtoValidator;
-            _httpContextAccessor = httpContextAccessor;
             _fanficChapterService = fanficChapterService;
-            _userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            _userId = httpContextAccessor.HttpContext.User.GetUserId();
         }
 
         public async Task<ServiceResultDto<string>> CreateFanficAsync(CreateFanficDto createFanficDto)
